@@ -1,5 +1,5 @@
 # Import necessary libraries
-import threading     # To run the engine simulation on a separate thread
+import threading     # To run engine simulation on separate thread
 import time          # For timing and delays
 import random        # To simulate dynamic engine variability
 import numpy as np   # For numerical operations and initializing data arrays
@@ -8,17 +8,15 @@ import matplotlib    # For graph plotting
 # Set the backend for matplotlib to 'Agg',
 # allowing plots to be saved without a GUI window (headless mode)
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt  # Used for plotting the MAP (Manifold Absolute Pressure) graph
+import matplotlib.pyplot as plt  # Used for plotting MAP (Manifold Absolute Pressure) graph
 import collections               # Provides deque for efficient rolling window of data
 import datetime                 # Used for timestamping saved plot files
 
 # --- Constants and User Inputs ---
 
-# Conversion factor: 1 kPa = ~0.145 PSI
-KPA_TO_PSI = 0.14503773773
+KPA_TO_PSI = 0.14503773773 # Conversion factor: 1 kPa = ~0.145 PSI
 
 # --- Engine State Parameters ---
-
 # IDLE state: throttle is closed
 IDLE_TPS = 0  # Throttle Position Sensor reading (%)
 
@@ -41,35 +39,41 @@ DECEL_MAP_KPA = 20          # Manifold pressure during deceleration (vacuum)
 DECEL_TPS = 0               # Throttle closed during decel
 
 # --- Boost Logic ---
-
 # Boost begins above atmospheric pressure (user input + elevation adjustment)
 BOOST_THRESHOLD_PSI = 0.0  # Will be computed from user-defined atmospheric pressure
 
+
 # --- User Input Placeholders ---
 
-BASE_NATURALLY_ASPIRATED_PEAK_HP = 0.0     # Stock engine horsepower (no boost)
-BASE_PEAK_HP_RPM = 0                       # RPM at which that HP is achieved
-ASSUMED_NA_WOT_MAP_PSI = 0.0               # Estimated MAP during NA wide-open throttle (will be derived)
+# Stock engine horsepower (HP) (no boost)
+BASE_NATURALLY_ASPIRATED_PEAK_HP = 0.0
+# RPM at which that HP is achieved
+BASE_PEAK_HP_RPM = 0
+# Estimated MAP during NA wide-open throttle (will be derived)
+ASSUMED_NA_WOT_MAP_PSI = 0.0
 
-USER_MAX_BOOST_PSI = 0.0                   # Peak boost pressure user wants to simulate
-RPM_AT_MAX_BOOST = 0                       # RPM where peak boost is reached
+# Peak boost pressure user wants to simulate
+USER_MAX_BOOST_PSI = 0.0
+# RPM where peak boost is reached
+RPM_AT_MAX_BOOST = 0
 
 # --- Simulation Control ---
 
-simulation_running = True                  # Main loop control flag
-stop_event = threading.Event()             # Thread-safe stop flag
+simulation_running = True   # Main loop control flag
+stop_event = threading.Event()  # Thread-safe stop flag
 
 # --- Data Tracking for Visualization ---
 
 # Store last 100 MAP values and timestamps for plotting
 map_history = collections.deque(np.zeros(100), maxlen=100)
-time_history = collections.deque(np.arange(100) * -0.1, maxlen=100)  # From -10 to 0 seconds (0.1s intervals)
+# From -10 to 0 seconds (0.1s intervals)
+time_history = collections.deque(np.arange(100) * -0.1, maxlen=100)
 
 # Dictionary holding the live simulation state (to be updated by simulation loop)
 current_sim_data = {
     "RPM": 0,
-    "MAP": 0.0,         # Manifold Absolute Pressure (in PSI)
-    "TPS": 0,           # Throttle Position (%)
+    "MAP": 0.0, # Manifold Absolute Pressure (in PSI)
+    "TPS": 0,   # Throttle Position (%)
     "BoostStatus": "Waiting...",
     "EstimatedHP": 0.0  # Calculated power based on RPM and MAP
 }
@@ -78,7 +82,8 @@ current_sim_data = {
 max_hp_achieved = 0.0
 max_rpm_achieved = 0
 max_boost_achieved_psi = 0.0
-boost_at_max_hp = 0.0  # Boost level at which peak HP occurred
+# Boost level at which peak HP occurred
+boost_at_max_hp = 0.0
 
 # --- Visualization Scaling (Adjusted Based on User Inputs) ---
 
@@ -88,11 +93,13 @@ USER_DEFINED_MAX_MAP_GAUGE = 29.0     # Top MAP (PSI) on graph
 # Atmospheric pressure at user's elevation (default = sea level = 14.7 PSI)
 ATMOSPHERIC_PRESSURE_PSI = 14.7
 
+
 # --- Matplotlib Setup ---
 
 # Create a new figure and axis for the plot
 fig, ax_plot = plt.subplots(1, 1, figsize=(10, 6))
-fig.set_facecolor('#f0f0f0')  # Set light gray background for readability
+# Set light gray background for readability
+fig.set_facecolor('#f0f0f0')
 
 
 # --- Graph Setup Function ---
@@ -171,10 +178,10 @@ def simulate_engine_data(duration_seconds=30):
     print(f"Simulation running...")
 
     # --- Initialize Simulation State ---
-    current_state = "idle"          # Start in idle state
-    state_duration = 0              # Time spent in current state
-    max_state_duration = 5          # Max time to remain in any one state
-    start_time = time.time()        # Start the simulation timer
+    current_state = "idle"   # Start in idle state
+    state_duration = 0       # Time spent in current state
+    max_state_duration = 5   # Max time to remain in any one state
+    start_time = time.time() # Start the simulation timer
 
     # Reset max boost tracker to boost threshold
     max_boost_achieved_psi = BOOST_THRESHOLD_PSI
@@ -209,7 +216,7 @@ def simulate_engine_data(duration_seconds=30):
 
         # ----- Simulate Each Engine State -----
 
-        # --- Idle State ---
+        # Idle State
         if current_state == "idle":
             rpm_val = random.randint(IDLE_RPM - 50, IDLE_RPM + 50)
             map_val = random.uniform(IDLE_MAP - 0.5, IDLE_MAP + 0.5)
@@ -218,7 +225,7 @@ def simulate_engine_data(duration_seconds=30):
                 current_state = random.choice(["cruise", "accel_na", "accel_boost"])
                 state_duration = 0
 
-        # --- Cruise State ---
+        # Cruise State
         elif current_state == "cruise":
             rpm_val = random.randint(CRUISE_RPM_MIN, CRUISE_RPM_MAX)
             map_val = random.uniform(CRUISE_MAP_MIN - 0.5, CRUISE_MAP_MAX + 0.5)
@@ -227,7 +234,7 @@ def simulate_engine_data(duration_seconds=30):
                 current_state = random.choice(["accel_boost", "accel_na", "decel", "idle"])
                 state_duration = 0
 
-        # --- Naturally Aspirated Acceleration (No Boost) ---
+        # Naturally Aspirated Acceleration (No Boost)
         elif current_state == "accel_na":
             rpm_val = random.randint(ACCEL_RPM_MIN, min(ACCEL_RPM_MAX, RPM_AT_MAX_BOOST - 500))
             map_val = random.uniform(ACCEL_MAP_NA_MAX - 0.5, ACCEL_MAP_NA_MAX + 0.5)
@@ -236,7 +243,7 @@ def simulate_engine_data(duration_seconds=30):
                 current_state = random.choice(["cruise", "decel", "accel_boost", "idle"])
                 state_duration = 0
 
-        # --- Boosted Acceleration ---
+        # Boosted Acceleration
         elif current_state == "accel_boost":
             target_rpm = random.randint(ACCEL_RPM_MIN, ACCEL_RPM_MAX)
 
@@ -268,7 +275,7 @@ def simulate_engine_data(duration_seconds=30):
                 current_state = random.choice(["cruise", "decel", "idle"])
                 state_duration = 0
 
-        # --- Deceleration ---
+        # Deceleration
         elif current_state == "decel":
             rpm_val = random.randint(DECEL_RPM_MIN, DECEL_RPM_MAX)
             map_val = random.uniform(DECEL_MAP_PSI - 0.5, DECEL_MAP_PSI + 0.5)
@@ -277,7 +284,7 @@ def simulate_engine_data(duration_seconds=30):
                 current_state = "idle"
                 state_duration = 0
 
-        # --- Update Current Simulation Data ---
+        # Update Current Simulation Data
 
         current_sim_data["RPM"] = rpm_val
         current_sim_data["MAP"] = float(map_val)
@@ -291,7 +298,7 @@ def simulate_engine_data(duration_seconds=30):
         else:
             current_sim_data["BoostStatus"] = "No Boost (Vacuum)"
 
-        # --- Estimate Horsepower (if MAP & RPM are sufficient) ---
+        # Estimate Horsepower (if MAP & RPM are sufficient)
         if HP_UNIT_FACTOR == 0 or current_sim_data["RPM"] < 500 or current_sim_data["MAP"] < 2:
             estimated_hp = 0.0
         else:
@@ -300,7 +307,7 @@ def simulate_engine_data(duration_seconds=30):
 
         current_sim_data["EstimatedHP"] = estimated_hp
 
-        # --- Track Maximum Stats ---
+        # Track Maximum Stats
         if estimated_hp > max_hp_achieved:
             max_hp_achieved = estimated_hp
             boost_at_max_hp = map_val
@@ -309,7 +316,7 @@ def simulate_engine_data(duration_seconds=30):
         if map_val > BOOST_THRESHOLD_PSI:
             max_boost_achieved_psi = max(max_boost_achieved_psi, map_val)
 
-        # --- Append to MAP History for Plotting ---
+        # Append to MAP History for Plotting
         map_history.append(map_val)
 
         # Wait 0.1s before next sample
@@ -323,20 +330,19 @@ def simulate_engine_data(duration_seconds=30):
 # Function to calculate atmospheric pressure based on elevation (Barometric Formula)
 def calculate_atmospheric_pressure(elevation_m):
     # Constants used in the barometric formula (SI units)
-    P0_kpa = 101.325     # Sea level standard pressure in kilopascals
-    L = 0.0065           # Temperature lapse rate (K/m)
-    T0 = 288.15          # Standard temperature at sea level in Kelvin
-    g = 9.80665          # Gravitational acceleration (m/s^2)
-    M = 0.0289644        # Molar mass of Earth's air (kg/mol)
-    R = 8.31447          # Universal gas constant (J/(mol·K))
+    P0_kpa = 101.325  # Sea level standard pressure in kilopascals
+    L = 0.0065     # Temperature lapse rate (K/m)
+    T0 = 288.15    # Standard temperature at sea level in Kelvin
+    g = 9.80665    # Gravitational acceleration (m/s^2)
+    M = 0.0289644  # Molar mass of Earth's air (kg/mol)
+    R = 8.31447    # Universal gas constant (J/(mol·K))
 
-    # If elevation is unrealistically high, return 0 pressure to avoid math domain error
+    # If elevation is unrealistically high,
+    # return 0 pressure to avoid math domain error
     if (L * elevation_m) >= T0:
         return 0.0
-
     # Apply the barometric formula to get pressure at given elevation in kPa
     pressure_kpa = P0_kpa * (1 - L * elevation_m / T0) ** (g * M / (R * L))
-
     # Convert kPa to PSI using the conversion constant and return
     return pressure_kpa * KPA_TO_PSI
 
@@ -363,7 +369,7 @@ if __name__ == "__main__":
     def get_int_input(prompt, min_val=None, max_val=None):
         return int(get_float_input(prompt, min_val, max_val))
 
-    # === Collect User Configuration ===
+    # Collect User Configuration
 
     # Ask for elevation to determine base atmospheric pressure
     user_elevation_m = get_float_input(
@@ -376,24 +382,23 @@ if __name__ == "__main__":
     BASE_NATURALLY_ASPIRATED_PEAK_HP = get_float_input(
         "Enter naturally aspirated peak horsepower: ", min_val=1)
 
-    # Ask for max boost pressure the engine can achieve (must be higher than atmospheric + 2 PSI)
+    # Ask for max boost pressure the engine can achieve
+    # (must be higher than atmospheric + 2 PSI)
     USER_MAX_BOOST_PSI = get_float_input("Enter target peak boost pressure (PSI): ",
                                          min_val=ATMOSPHERIC_PRESSURE_PSI + 2,
                                          max_val=45)
-
     # Ask for engine redline RPM
     ACCEL_RPM_MAX = get_int_input("Enter redline RPM: ", min_val=5000, max_val=10000)
-
     # Ask for engine idle RPM
     IDLE_RPM = get_int_input("Enter idle RPM: ", min_val=500, max_val=1000)
 
-    # === Derived Configuration Based on User Input ===
-
+    # Derived Configuration Based on User Input
     BOOST_THRESHOLD_PSI = ATMOSPHERIC_PRESSURE_PSI + 0.7  # Pressure beyond which boost is active
-
-    RPM_AT_MAX_BOOST = int(ACCEL_RPM_MAX * 0.9)  # Boost should reach its max at ~90% redline
+    # Boost should reach its max at ~90% redline
+    RPM_AT_MAX_BOOST = int(ACCEL_RPM_MAX * 0.9)
     if RPM_AT_MAX_BOOST < ACCEL_RPM_MIN:
-        RPM_AT_MAX_BOOST = ACCEL_RPM_MIN + 500  # Ensure boost RPM is realistic
+        # Ensure boost RPM is realistic
+        RPM_AT_MAX_BOOST = ACCEL_RPM_MIN + 500
 
     # Define RPM ranges for cruise and decel based on idle and accel thresholds
     CRUISE_RPM_MAX = int(ACCEL_RPM_MIN * 0.9)
@@ -406,23 +411,19 @@ if __name__ == "__main__":
     USER_DEFINED_MAX_RPM_GAUGE = ACCEL_RPM_MAX + 500
     USER_DEFINED_MAX_MAP_GAUGE = USER_MAX_BOOST_PSI + 7.5
 
-    # === Setup and Launch Simulation ===
-
+    # Setup and Launch Simulation
     # Configure the plot
     setup_live_plot(ax_plot)
     fig.tight_layout(rect=[0, 0, 1, 0.95])
-
     # Launch the engine simulation in a background thread for responsiveness
     simulation_thread = threading.Thread(target=simulate_engine_data, args=(45,), daemon=True)
     simulation_thread.start()
-
     # Update the plot live while simulation is running
     while simulation_running:
         update_graphs_for_save()
         fig.canvas.draw()
         plt.pause(0.05)
         time.sleep(0.05)
-
     # Final update after simulation ends
     update_graphs_for_save()
     fig.canvas.draw()
