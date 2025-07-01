@@ -14,6 +14,7 @@ import datetime                 # Used for timestamping saved plot files
 
 # --- Constants and User Inputs ---
 
+# Kilopascal to Pound-Force per Square Inch
 KPA_TO_PSI = 0.14503773773 # Conversion factor: 1 kPa = ~0.145 PSI
 
 # --- Engine State Parameters ---
