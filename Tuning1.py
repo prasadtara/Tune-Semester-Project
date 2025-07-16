@@ -41,7 +41,7 @@ DECEL_TPS = 0               # Throttle closed during decel
 
 # --- Boost Logic ---
 # Boost begins above atmospheric pressure (user input + elevation adjustment)
-BOOST_THRESHOLD_PSI = 0.0  # Will be computed from user-defined atmospheric pressure
+BOOST_ACTIVE_PSI = 0.0  # Will be computed from user-defined atmospheric pressure
 
 
 # --- User Input Placeholders ---
@@ -49,7 +49,7 @@ BOOST_THRESHOLD_PSI = 0.0  # Will be computed from user-defined atmospheric pres
 # Stock engine horsepower (HP) (no boost)
 BASE_NATURALLY_ASPIRATED_PEAK_HP = 0.0
 # RPM at which that HP is achieved
-BASE_PEAK_HP_RPM = 0
+BASE__HP_RPM = 0
 # Estimated MAP during NA wide-open throttle (will be derived)
 ASSUMED_NA_WOT_MAP_PSI = 0.0
 
@@ -66,9 +66,9 @@ stop_event = threading.Event()  # Thread-safe stop flag
 # --- Data Tracking for Visualization ---
 
 # Store last 100 MAP values and timestamps for plotting
-map_history = collections.deque(np.zeros(100), maxlen=100)
-# From -10 to 0 seconds (0.1s intervals)
-time_history = collections.deque(np.arange(100) * -0.1, maxlen=100)
+map_history = collections.deque(np.zeros(450), maxlen=450)
+# From -45 to 0 seconds (0.1s intervals)
+time_history = collections.deque(np.arange(450) * -0.1, maxlen=450)
 
 # Dictionary holding the live simulation state (to be updated by simulation loop)
 current_sim_data = {
@@ -111,16 +111,16 @@ def setup_live_plot(ax):
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("MAP (PSI)")
     ax.set_ylim(0, USER_DEFINED_MAX_MAP_GAUGE + 5)
-    ax.set_xlim(-10, 0)
+    ax.set_xlim(-45, 0)
     ax.grid(True)
 
     # Orange dashed line = boost threshold
-    ax.axhline(BOOST_THRESHOLD_PSI, color='orange', linestyle='--',
-               label=f'Boost Threshold ({BOOST_THRESHOLD_PSI:.1f} PSI)')
+    ax.axhline(USER_MAX_BOOST_PSI, color='orange', linestyle='--',
+               label=f'Maximum Boost: {USER_MAX_BOOST_PSI:.1f} PSI')
 
     # Red dotted line = atmospheric pressure reference
     ax.axhline(ATMOSPHERIC_PRESSURE_PSI, color='red', linestyle=':',
-               label=f'Atmospheric Pressure ({ATMOSPHERIC_PRESSURE_PSI:.1f} PSI)')
+               label=f'Atmospheric Pressure: {ATMOSPHERIC_PRESSURE_PSI:.1f} PSI')
 
     ax.legend(loc='upper left')
 
@@ -137,7 +137,7 @@ def update_graphs_for_save():
 
     # Determine boost summary for title
     display_max_boost = max_boost_achieved_psi
-    if display_max_boost < BOOST_THRESHOLD_PSI:
+    if display_max_boost < BOOST_ACTIVE_PSI:
         boost_display_str = "N/A (No Boost Hit)"
     else:
         boost_display_str = f"{display_max_boost:.1f} PSI"
@@ -170,7 +170,7 @@ def simulate_engine_data(duration_seconds=30):
         max_boost_achieved_psi, HP_UNIT_FACTOR, boost_at_max_hp
     global IDLE_RPM, IDLE_MAP, CRUISE_RPM_MIN, CRUISE_RPM_MAX, \
         CRUISE_MAP_MIN, CRUISE_MAP_MAX, ACCEL_RPM_MIN, ACCEL_RPM_MAX
-    global USER_MAX_BOOST_PSI, RPM_AT_MAX_BOOST, BOOST_THRESHOLD_PSI, \
+    global USER_MAX_BOOST_PSI, RPM_AT_MAX_BOOST, BOOST_ACTIVE_PSI, \
         ATMOSPHERIC_PRESSURE_PSI, ASSUMED_NA_WOT_MAP_PSI
     global DECEL_RPM_MIN, DECEL_RPM_MAX, DECEL_MAP_KPA, ACCEL_MAP_NA_MAX, BASE_PEAK_HP_RPM
 
@@ -185,7 +185,7 @@ def simulate_engine_data(duration_seconds=30):
     start_time = time.time() # Start the simulation timer
 
     # Reset max boost tracker to boost threshold
-    max_boost_achieved_psi = BOOST_THRESHOLD_PSI
+    max_boost_achieved_psi = BOOST_ACTIVE_PSI
 
     # --- Calibrate MAP values based on atmospheric pressure ---
     IDLE_MAP = ATMOSPHERIC_PRESSURE_PSI * 0.3
@@ -268,7 +268,9 @@ def simulate_engine_data(duration_seconds=30):
 
             # Add random variation to MAP for realism
             map_val = random.uniform(target_map - 0.5, target_map + 0.5)
-            map_val = max(ATMOSPHERIC_PRESSURE_PSI * 0.1, min(map_val, USER_MAX_BOOST_PSI + 1.0))
+            map_val = max(ATMOSPHERIC_PRESSURE_PSI * 0.1, min(map_val, USER_MAX_BOOST_PSI))
+    
+
 
             tps_val = random.randint(ACCEL_TPS_MIN, ACCEL_TPS_MAX)
 
@@ -291,14 +293,6 @@ def simulate_engine_data(duration_seconds=30):
         current_sim_data["MAP"] = float(map_val)
         current_sim_data["TPS"] = tps_val
 
-        # Determine boost status message
-        if map_val > BOOST_THRESHOLD_PSI:
-            current_sim_data["BoostStatus"] = "*** BOOST ACTIVE! ***"
-        elif map_val > (ATMOSPHERIC_PRESSURE_PSI * 0.9):
-            current_sim_data["BoostStatus"] = "No Boost (Atmospheric)"
-        else:
-            current_sim_data["BoostStatus"] = "No Boost (Vacuum)"
-
         # Estimate Horsepower (if MAP & RPM are sufficient)
         if HP_UNIT_FACTOR == 0 or current_sim_data["RPM"] < 500 or current_sim_data["MAP"] < 2:
             estimated_hp = 0.0
@@ -314,7 +308,7 @@ def simulate_engine_data(duration_seconds=30):
             boost_at_max_hp = map_val
             max_rpm_achieved = rpm_val
 
-        if map_val > BOOST_THRESHOLD_PSI:
+        if map_val > BOOST_ACTIVE_PSI:
             max_boost_achieved_psi = max(max_boost_achieved_psi, map_val)
 
         # Append to MAP History for Plotting
@@ -370,7 +364,7 @@ if __name__ == "__main__":
     def get_int_input(prompt, min_val=None, max_val=None):
         return int(get_float_input(prompt, min_val, max_val))
 
-    # Collect User Configuration
+    print("***Welcome To Your Engine Performance Simulator!***")
 
     # Ask for elevation to determine base atmospheric pressure
     user_elevation_m = get_float_input(
@@ -385,8 +379,13 @@ if __name__ == "__main__":
 
     # Ask for max boost pressure the engine can achieve
     # (must be higher than atmospheric + 2 PSI)
-    USER_MAX_BOOST_PSI = get_float_input("Enter target peak boost pressure (PSI): ",
-                                         min_val=ATMOSPHERIC_PRESSURE_PSI + 2,
+    USER_MAX_BOOST_PSI = get_float_input("Enter target peak boost pressure (PSI):\n"
+                                         "*To find target peak boost PSI, add your boost system's\n" 
+                                         "pressure to the atmospheric pressure. For example, if\n"
+                                         "the atmospheric pressure is 10 PSI and your boost\n"
+                                         "system provides 6 PSI, the target peak boost pressure would\n" 
+                                         "be 10+6=16 PSI.*",
+                                         min_val=round(ATMOSPHERIC_PRESSURE_PSI),
                                          max_val=45)
     # Ask for engine redline RPM
     ACCEL_RPM_MAX = get_int_input("Enter redline RPM: ", min_val=5000, max_val=10000)
@@ -394,7 +393,7 @@ if __name__ == "__main__":
     IDLE_RPM = get_int_input("Enter idle RPM: ", min_val=500, max_val=1000)
 
     # Derived Configuration Based on User Input
-    BOOST_THRESHOLD_PSI = ATMOSPHERIC_PRESSURE_PSI + 0.7  # Pressure beyond which boost is active
+    BOOST_ACTIVE_PSI = ATMOSPHERIC_PRESSURE_PSI  # Pressure at which boost is active
     # Boost should reach its max at ~90% redline
     RPM_AT_MAX_BOOST = int(ACCEL_RPM_MAX * 0.9)
     if RPM_AT_MAX_BOOST < ACCEL_RPM_MIN:
@@ -423,15 +422,13 @@ if __name__ == "__main__":
     while simulation_running:
         update_graphs_for_save()
         fig.canvas.draw()
-        plt.pause(0.05)
         time.sleep(0.05)
     # Final update after simulation ends
     update_graphs_for_save()
     fig.canvas.draw()
 
-    # Save the final simulation graph with timestamped filename
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_filename = f"engine_simulation_{timestamp}.png"
+    # Save the final simulation graph to png
+    output_filename = f"engine_simulation.png"
     plt.savefig(output_filename, dpi=300, bbox_inches='tight')
     print(f"Simulation complete. Image saved to {output_filename}")
 
