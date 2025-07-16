@@ -49,7 +49,7 @@ BOOST_ACTIVE_PSI = 0.0  # Will be computed from user-defined atmospheric pressur
 # Stock engine horsepower (HP) (no boost)
 BASE_NATURALLY_ASPIRATED_PEAK_HP = 0.0
 # RPM at which that HP is achieved
-BASE__HP_RPM = 0
+BASE_HP_RPM = 0
 # Estimated MAP during NA wide-open throttle (will be derived)
 ASSUMED_NA_WOT_MAP_PSI = 0.0
 
