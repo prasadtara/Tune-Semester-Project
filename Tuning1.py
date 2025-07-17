@@ -384,7 +384,7 @@ if __name__ == "__main__":
                                          "pressure to the atmospheric pressure. For example, if\n"
                                          "the atmospheric pressure is 10 PSI and your boost\n"
                                          "system provides 6 PSI, the target peak boost pressure would\n" 
-                                         "be 10+6=16 PSI.*",
+                                         "be 10+6=16 PSI.*\n",
                                          min_val=round(ATMOSPHERIC_PRESSURE_PSI),
                                          max_val=45)
     # Ask for engine redline RPM
