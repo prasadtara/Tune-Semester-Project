@@ -22,7 +22,7 @@ Regarding User inputs:
     - Enter the maximum boost pressure your engine’s boost system can produce in PSI, including atmospheric pressure (e.g., if atmospheric pressure is 14.7 PSI and        your turbo adds 6 PSI, enter 20.7).
     -     [NOTE: You must do research on the modification you're planning to
           make and enter those parameters accordingly. This means that you
-          must do your research and caluclate with the PSI of boost that the
+          must do your research and calculate with the PSI of boost that the
           turbo that YOU want to add to your vehicle would make. This can be
           done a simple Google Search '(make and model of your preferred boost)
           boost pressure in PSI.']
