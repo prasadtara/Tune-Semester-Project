@@ -24,8 +24,12 @@ Regarding User inputs:
           make and enter those parameters accordingly. This means that you
           must do your research and calculate with the PSI of boost that the
           turbo that YOU want to add to your vehicle would make. This can be
-          done a simple Google Search '(make and model of your preferred boost)
-          boost pressure in PSI.']
+          done with a simple Google Search '(make and model of your preferred
+          boost) boost pressure in PSI.' This is also catered to YOU, so you,
+          as the client must provide the parameters for the modificaiton or
+          upgrade that you are interested in so we can help you get the right
+          data to decide whether or not it's an upgrade that you would be
+          satisfied with if you invested in it legitimately.]
    -  Must be at least the atmospheric pressure, max 45 PSI.
     Redline RPM
     - Enter the maximum RPM your engine reaches (e.g., 7000).
