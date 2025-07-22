@@ -1,10 +1,39 @@
-# Tune-Semester-Project
+This Python project simulates engine performance data, with a focus on accurately calculating horsepower-related values and verifying those through unit tests. 
+It is intended to help test and visualize various engine characteristics such as MAP (Manifold Absolute Pressure), RPM, and horsepower over a simulated period.'
 
-# Instructions to Run the "Tune Your Car" Semester Project
+Features:
+- Simulates engine data over a user-specified duration.
+- Calculates and stores a Horsepower Unit Factor for internal performance comparisons.
+- Includes unit tests using Python's unittest framework.
+- Logs and prints output for transparency and debugging
 
-There is only one file to run, called "CarTuning.py"
-1. To try the programme, simply run it
-2.  It will provide specific questions
-    --> Simply answer the questions and hit enter
-3. The programme will run and ultimately provide results.
-    --> The final output takes roughly 45 seconds.
+You can use an IDE like PyCharm, VS Code, Jupyter Notebook to run this program.
+- No external dependencies are required for basic simulation and testing
+
+Regarding User inputs:
+- When you run the program, it will ask for the following inputs, one at a time:
+    Elevation (meters)
+    - Enter the altitude in meters where the engine operates (e.g., 0 for sea level, 1500 for high altitude).
+    - Range accepted: -400 to 8000 meters
+    Naturally aspirated peak horsepower
+    - Enter the peak horsepower your naturally aspirated engine produces (e.g., 300).
+    - Must be at least 1.
+    Target peak boost pressure (PSI)
+    - Enter the maximum boost pressure your engine’s boost system can produce in PSI, including atmospheric pressure (e.g., if atmospheric pressure is 14.7 PSI and        your turbo adds 6 PSI, enter 20.7).
+   -  Must be at least the atmospheric pressure, max 45 PSI.
+    Redline RPM
+    - Enter the maximum RPM your engine reaches (e.g., 7000).
+    - Range accepted: 5000 to 10000 RPM
+    Idle RPM
+    - Enter the RPM your engine idles at (e.g., 800).
+    - Range accepted: 500 to 1000 RPM
+ 
+What Happens After All the Input is Provided?
+- The program will calculate internal parameters based on your inputs.
+- It will run a 45-second simulation in the background showing different engine states
+  (idle, cruise, acceleration, deceleration) with dynamic RPM, MAP, and throttle position values.
+- A live graph of manifold absolute pressure over time is updated during simulation.
+- When the simulation finishes, a graph image named engine_simulation.png will be saved in the current directory.
+- The program prints confirmation that the simulation is complete and where the image is saved.
+
+
