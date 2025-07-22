@@ -47,4 +47,6 @@ What Happens After All the Input is Provided?
 - When the simulation finishes, a graph image named engine_simulation.png will be saved in the current directory.
 - The program prints confirmation that the simulation is complete and where the image is saved.
 
+**NOTE: The .png will be overwritten every time the program is run. If you wish to save an ouput, be sure to rename it so that it is preserved.**
+
 
