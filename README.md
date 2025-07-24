@@ -1,5 +1,5 @@
 This Python project simulates engine performance data, with a focus on accurately calculating horsepower-related values and verifying those through unit tests. 
-It is intended to help test and visualize various engine characteristics such as MAP (Manifold Absolute Pressure), RPM, and horsepower over a simulated period.'
+It is intended to help test and visualize various engine characteristics such as MAP (Manifold Absolute Pressure), RPM, and horsepower over a simulated period.
 
 Features:
 - Simulates engine data over a user-specified duration.
