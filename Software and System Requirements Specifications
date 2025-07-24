@@ -1,0 +1,31 @@
+Tara Prasad
+Sreya Kalyan
+CS3300 – Tue/Thur (9:25am)
+Prof. Armin Moin
+TA Himon Thakur
+Software and System Requirements Specifications
+
+1.	Accuracy
+  a.	 The key is precise adjustments
+  b.	The code could function, but it wouldn’t meet the “accuracy” requirements 
+      because the code could finish running with no errors but still output unreasonable or unfeasible outcomes, 
+      such as horsepower quantities that the engine isn’t even capable of producing, let alone withstanding.
+2.	Reliability
+  a.	The code cannot break.
+  b.	This is different than accuracy, in which we discuss the numbers that are outputted should be accurate. 
+      In this, we say that the numbers must be outputted no matter the accuracy because this isn’t where we evaluate accuracy.
+  c.	We don’t want any errors, - problems in running the program, exception errors or bounds error, etc.
+  d.	The code must run from start to finish as expected, - the same, every single time.
+3.	Maintainability
+  a.	Must be well documented and easy to maintain. This should be clearly documented and defined. 
+      We should be able to iterate or build on this at any time.
+4.	Simulated fuel injection adjustment
+  a.	There is precise adjustment of fuel delivery to match engine load
+5.	Engine parameter logging
+  a.	We will log engine parameters like RPM, temperature, and pressures
+6.	UI
+  a.	An interface for inputting commands, visualizing data, and configuring settings
+7.	Parameter definition
+  a.	There are defined and customized engine parameters
+8.	Performance
+  a.	Must respond accurately to user inputs and update parameters
