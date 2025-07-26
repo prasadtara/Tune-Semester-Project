@@ -1,0 +1,70 @@
+Tara Prasad, Sreya Kalyan
+CS3300
+
+Semester Project Software Design Sketch
+
+Engine Simulation
+	•	Calculations: RPM, MAP, TPS, Estimated HP
+	•	Simulated states: idle, cruise, acceleration, deceleration, boosted acceleration
+
+Engine Simulation
+	•	Calculations: RPM, MAP, TPS, Estimated HP
+	•	Simulated states: idle, cruise, acceleration, deceleration, boosted acceleration
+
+Graphing/Plotting
+	•	Matplotlib setup
+	•	Live plot update
+	•	Max stat display
+	•	Save plot to png
+
+Graphing/Plotting
+	•	Matplotlib setup
+	•	Live plot update
+	•	Max stat display
+	•	Save plot to png
+
+Data (historical)
+	•	map_history (deque)
+	•	time_history (deque)
+
+Data (historical)
+	•	map_history (deque)
+	•	time_history (deque)
+
+Data (shared)
+	•	RPM
+	•	MAP
+	•	TPS
+	•	EstimatedHP
+
+Data (shared)
+	•	RPM
+	•	MAP
+	•	TPS
+	•	EstimatedHP
+
+Global Constants/Derived Parameters
+	•	ATMOSPHERIC_PSI
+	•	BOOST_ACTIVE_PSI
+	•	HP_UNIT_FACTOR
+	•	Gauge Limits
+
+Global Constants/Derived Parameters
+	•	ATMOSPHERIC_PSI
+	•	BOOST_ACTIVE_PSI
+	•	HP_UNIT_FACTOR
+	•	Gauge Limits
+
+User Input
+	•	Elevation
+	•	Base HP
+	•	Boost PSI
+	•	Redline RPM
+	•	Idle RPM
+
+User Input
+	•	Elevation
+	•	Base HP
+	•	Boost PSI
+	•	Redline RPM
+	•	Idle RPM
